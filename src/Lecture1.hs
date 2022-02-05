@@ -71,9 +71,8 @@ sumOfSquares x y = x * x + y * y
 -}
 -- DON'T FORGET TO SPECIFY THE TYPE IN HERE
 lastDigit :: Int -> Int
-lastDigit n
-        | n > 0    = mod n 10
-        |otherwise = mod (-n) 10
+lastDigit n = mod (abs n) 10
+        
 
 {- | Write a function that takes three numbers and returns the
 difference between the biggest number and the smallest one.
@@ -116,7 +115,7 @@ string.
 subString :: Int -> Int -> [Char] -> [Char]
 subString start end str
         | end < 0   = ""
-        | start <= 0 = take (end+1) (drop (start-start) str)
+        | start <= 0 = take (end+1) str
         | otherwise  = take (end-start+1) (drop start str)
 
 {- | Write a function that takes a String — space separated numbers,
@@ -128,7 +127,7 @@ and finds a sum of the numbers inside this string.
 The string contains only spaces and/or numbers.
 -}
 strSum :: [Char] -> Int
-strSum str = sum (map read (words str) :: [Int])
+strSum str = sum (map read (words str))
 
 {- | Write a function that takes a number and a list of numbers and
 returns a string, saying how many elements of the list are strictly
