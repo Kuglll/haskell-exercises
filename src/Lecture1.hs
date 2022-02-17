@@ -150,10 +150,10 @@ lowerAndGreater n list = go 0 0 list
                 where
                     go :: Int -> Int -> [Int] -> [Char]
                     go lower greater l
-                            | l == [] = show n ++ " is greater than " ++ show lower ++ " elements and lower than " ++ show greater ++ " elements"
-                            | head l < n = go (lower + 1) greater $ tail l
-                            | head l > n = go lower (greater + 1) $ tail l
-                            | otherwise = go lower greater $ tail l
+                        | l == [] = show n ++ " is greater than " ++ show lower ++ " elements and lower than " ++ show greater ++ " elements"
+                        | head l < n = go (lower + 1) greater $ tail l
+                        | head l > n = go lower (greater + 1) $ tail l
+                        | otherwise = go lower greater $ tail l
 
 
 
