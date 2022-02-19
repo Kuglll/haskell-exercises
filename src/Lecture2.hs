@@ -100,7 +100,7 @@ lists of even lengths.
 -}
 
 evenLists :: [[a]] -> [[a]]
-evenLists listOfLists = filter isOfEvenLength listOfLists
+evenLists = filter isOfEvenLength
 
 isOfEvenLength :: [a] -> Bool
 isOfEvenLength list = if mod (length list) 2 == 0 then True else False
@@ -120,7 +120,7 @@ spaces.
 🕯 HINT: look into Data.Char and Prelude modules for functions you may use.
 -}
 dropSpaces :: [Char] -> [Char]
-dropSpaces = error "TODO"
+dropSpaces = head . words
 
 {- |
 
