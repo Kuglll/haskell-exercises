@@ -181,9 +181,53 @@ data Knight = Knight
     { knightHealth    :: Int
     , knightAttack    :: Int
     , knightEndurance :: Int
-    }
+    } deriving (Show)
 
-dragonFight = error "TODO"
+data Treasure = Treasure
+    { content :: String
+    } deriving (Show)
+
+data Chest = Chest
+    { treasure :: Maybe Treasure
+    , gold     :: Int
+    } deriving (Show)
+
+data Dragon = Dragon
+    { dragonFirePower :: Int
+    , dragonHealth    :: Int
+    , dragonType      :: DragonType
+    } deriving (Show)
+
+data DragonType = Red | Black | Green deriving (Enum, Eq, Show)
+
+getExperienceForDragon :: DragonType -> Int
+getExperienceForDragon dragonType
+                      | dragonType == Red = 100
+                      | dragonType == Black = 150
+                      | dragonType == Green = 250
+
+getChestForDragon :: DragonType -> Chest -> Chest
+getChestForDragon dragonType chest
+                  | dragonType == Red = chest
+                  | dragonType == Black = chest
+                  | dragonType == Green = Chest Nothing (gold chest)
+
+getRewardsForDragon :: DragonType -> Chest -> (Int, Chest)
+getRewardsForDragon dragonType chest
+                    | dragonType == Red = (getExperienceForDragon Red, getChestForDragon dragonType chest)
+                    | dragonType == Black = (getExperienceForDragon Black, getChestForDragon dragonType chest)
+                    | dragonType == Green = (getExperienceForDragon Green, getChestForDragon dragonType chest)
+
+dragonFight :: Knight -> Dragon -> Chest -> [Char]
+dragonFight knight dragon chest = simulateFight 0 knight dragon chest (dragonHealth dragon) (knightHealth knight) (knightEndurance knight)
+            where 
+              simulateFight :: Int -> Knight -> Dragon -> Chest -> Int -> Int -> Int -> [Char]
+              simulateFight numberOfSlays knight dragon chest dragonHealth knightHealth knightEndurance
+                  | dragonHealth < 0 = "Knight won! Rewards: " ++ show (getRewardsForDragon (dragonType dragon) chest)
+                  | knightEndurance == 0 = "Knight ran away!"
+                  | knightHealth <= 0 = "Dragon won!"
+                  | numberOfSlays == 10 = simulateFight 0 knight dragon chest (dragonHealth - (knightAttack knight)) (knightHealth - (dragonFirePower dragon))  (knightEndurance - 1)
+                  | otherwise = simulateFight (numberOfSlays + 1) knight dragon chest (dragonHealth - (knightAttack knight)) knightHealth (knightEndurance - 1)
 
 ----------------------------------------------------------------------------
 -- Extra Challenges
