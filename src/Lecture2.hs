@@ -51,8 +51,14 @@ zero, you can stop calculating product and return 0 immediately.
 >>> lazyProduct [4, 3, 7]
 84
 -}
-lazyProduct :: [Int] -> Int
-lazyProduct = error "TODO"
+lazyProduct :: (Num a, Eq a) => [a] -> a
+lazyProduct list = calculateSum 1 list
+          where
+            calculateSum :: (Num a, Eq a) => a -> [a] -> a
+            calculateSum sum l
+              | l == [] = sum
+              | head l == 0 = 0
+              | otherwise = calculateSum (sum * head l) (tail l)
 
 {- | Implement a function that duplicates every element in the list.
 
@@ -62,7 +68,11 @@ lazyProduct = error "TODO"
 "ccaabb"
 -}
 duplicate :: [a] -> [a]
-duplicate = error "TODO"
+duplicate list = makeDuplicateList [] list
+          where
+            makeDuplicateList :: [a] -> [a] -> [a]
+            makeDuplicateList l [] = l
+            makeDuplicateList l (x:xs) = makeDuplicateList (l ++ [x,x])  xs
 
 {- | Implement function that takes index and a list and removes the
 element at the given position. Additionally, this function should also
@@ -74,7 +84,10 @@ return the removed element.
 >>> removeAt 10 [1 .. 5]
 (Nothing,[1,2,3,4,5])
 -}
-removeAt = error "TODO"
+removeAt :: (Ord a) => Int -> [a] -> (Maybe a, [a])
+removeAt index list
+           | index < 0 || index >= length list = (Nothing, list)
+           | otherwise = (Just $ last $ take (index + 1) list, (take index list ++ drop (index + 1) list))
 
 {- | Write a function that takes a list of lists and returns only
 lists of even lengths.
@@ -85,7 +98,12 @@ lists of even lengths.
 ♫ NOTE: Use eta-reduction and function composition (the dot (.) operator)
   in this function.
 -}
-evenLists = error "TODO"
+
+evenLists :: [[a]] -> [[a]]
+evenLists = filter isOfEvenLength
+
+isOfEvenLength :: [a] -> Bool
+isOfEvenLength list = if mod (length list) 2 == 0 then True else False
 
 {- | The @dropSpaces@ function takes a string containing a single word
 or number surrounded by spaces and removes all leading and trailing
@@ -101,7 +119,8 @@ spaces.
 
 🕯 HINT: look into Data.Char and Prelude modules for functions you may use.
 -}
-dropSpaces = error "TODO"
+dropSpaces :: [Char] -> [Char]
+dropSpaces = head . words
 
 {- |
 
@@ -162,9 +181,53 @@ data Knight = Knight
     { knightHealth    :: Int
     , knightAttack    :: Int
     , knightEndurance :: Int
-    }
+    } deriving (Show)
 
-dragonFight = error "TODO"
+data Treasure = Treasure
+    { content :: String
+    } deriving (Show)
+
+data Chest = Chest
+    { treasure :: Maybe Treasure
+    , gold     :: Int
+    } deriving (Show)
+
+data Dragon = Dragon
+    { dragonFirePower :: Int
+    , dragonHealth    :: Int
+    , dragonType      :: DragonType
+    } deriving (Show)
+
+data DragonType = Red | Black | Green deriving (Enum, Eq, Show)
+
+getExperienceForDragon :: DragonType -> Int
+getExperienceForDragon dragonType
+                      | dragonType == Red = 100
+                      | dragonType == Black = 150
+                      | dragonType == Green = 250
+
+getChestForDragon :: DragonType -> Chest -> Chest
+getChestForDragon dragonType chest
+                  | dragonType == Red = chest
+                  | dragonType == Black = chest
+                  | dragonType == Green = Chest Nothing (gold chest)
+
+getRewardsForDragon :: DragonType -> Chest -> (Int, Chest)
+getRewardsForDragon dragonType chest
+                    | dragonType == Red = (getExperienceForDragon Red, getChestForDragon dragonType chest)
+                    | dragonType == Black = (getExperienceForDragon Black, getChestForDragon dragonType chest)
+                    | dragonType == Green = (getExperienceForDragon Green, getChestForDragon dragonType chest)
+
+dragonFight :: Knight -> Dragon -> Chest -> [Char]
+dragonFight knight dragon chest = simulateFight 0 knight dragon chest (dragonHealth dragon) (knightHealth knight) (knightEndurance knight)
+            where 
+              simulateFight :: Int -> Knight -> Dragon -> Chest -> Int -> Int -> Int -> [Char]
+              simulateFight numberOfSlays knight dragon chest dragonHealth knightHealth knightEndurance
+                  | dragonHealth < 0 = "Knight won! Rewards: " ++ show (getRewardsForDragon (dragonType dragon) chest)
+                  | knightEndurance == 0 = "Knight ran away!"
+                  | knightHealth <= 0 = "Dragon won!"
+                  | numberOfSlays == 10 = simulateFight 0 knight dragon chest (dragonHealth - (knightAttack knight)) (knightHealth - (dragonFirePower dragon))  (knightEndurance - 1)
+                  | otherwise = simulateFight (numberOfSlays + 1) knight dragon chest (dragonHealth - (knightAttack knight)) knightHealth (knightEndurance - 1)
 
 ----------------------------------------------------------------------------
 -- Extra Challenges
