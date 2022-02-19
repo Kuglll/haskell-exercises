@@ -52,7 +52,7 @@ data Weekday
     | Friday
     | Saturday
     | Sunday
-    deriving (Show, Eq)
+    deriving (Show, Eq, Enum, Bounded)
 
 {- | Write a function that will display only the first three letters
 of a weekday.
@@ -60,7 +60,8 @@ of a weekday.
 >>> toShortString Monday
 "Mon"
 -}
-toShortString = error "TODO"
+toShortString :: Weekday -> [Char]
+toShortString day = take 3 (show day)
 
 {- | Write a function that returns next day of the week, following the
 given day.
@@ -82,7 +83,8 @@ Tuesday
   would work for **any** enumeration type in Haskell (e.g. 'Bool',
   'Ordering') and not just 'Weekday'?
 -}
-next = error "TODO"
+next :: (Enum a) => a -> a
+next = succ
 
 {- | Implement a function that calculates number of days from the first
 weekday to the second.
@@ -92,7 +94,11 @@ weekday to the second.
 >>> daysTo Friday Wednesday
 5
 -}
-daysTo = error "TODO"
+daysTo :: Weekday -> Weekday -> Int
+daysTo first second
+          | fromEnum first == fromEnum second = 0
+          | fromEnum first < fromEnum second = fromEnum second - fromEnum first
+          | fromEnum first > fromEnum second = (length $ enumFrom first) + fromEnum second
 
 {-
 
@@ -108,9 +114,11 @@ newtype Gold = Gold
 
 -- | Addition of gold coins.
 instance Semigroup Gold where
+  gold1 <> gold2 = Gold ((unGold gold1) + (unGold gold2))
 
 
 instance Monoid Gold where
+  mempty = Gold 0
 
 
 {- | A reward for completing a difficult quest says how much gold
@@ -125,9 +133,11 @@ data Reward = Reward
     } deriving (Show, Eq)
 
 instance Semigroup Reward where
+  chest1 <> chest2 = Reward ((rewardGold chest1) <> (rewardGold chest2)) ((rewardSpecial chest1) || (rewardSpecial chest2))
 
 
 instance Monoid Reward where
+  mempty = Reward (Gold 0) False
 
 
 {- | 'List1' is a list that contains at least one element.
@@ -137,7 +147,7 @@ data List1 a = List1 a [a]
 
 -- | This should be list append.
 instance Semigroup (List1 a) where
-
+  list1 <> list2 = list1 <> list2
 
 {- | Does 'List1' have the 'Monoid' instance? If no then why?
 
